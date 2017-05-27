@@ -7,7 +7,6 @@ export default class Board extends Component {
     super(props);
     this.cells = [];
     this.liveCells = [];
-    // this.addToAliveCells = this.addToAliveCells.bind(this);
     this.toggleLife = this.toggleLife.bind(this);
     this.startGame = this.startGame.bind(this);
     this.initialSetup();
@@ -16,11 +15,6 @@ export default class Board extends Component {
         lifeCycle: 0
     };
   }
-
-  // addToAliveCells(x,y,index){
-  //   this.liveCells.push({x,y,index});
-  //   console.log(this.liveCells);
-  // }
 
   toggleLife(cell){
     if (this.liveCells.includes(cell)){
@@ -41,7 +35,6 @@ export default class Board extends Component {
 
   getNeighborCount(cell){
     let neighbors = [];
-    // debugger;
     this.liveCells.forEach((liveCell) => {
       if ((liveCell.props.x >= cell.props.x - 1 && liveCell.props.x <= cell.props.x + 1 ) && (liveCell.props.y >= cell.props.y -1 && liveCell.props.y <= cell.props.y + 1) && (liveCell != cell)   ){
         neighbors.push(liveCell);
@@ -60,15 +53,12 @@ export default class Board extends Component {
     });
 
     choppingBlock.forEach((cell) => this.toggleLife(cell));
-
   }
 
   startGame(){
     // setInterval(() => this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
     this.liveCellCheck();
   }
-
-
 
   render() {
 
