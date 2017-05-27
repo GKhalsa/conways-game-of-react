@@ -4,32 +4,32 @@ import Cell from './Cell'
 export default class Board extends Component {
 
   constructor(props){
-    super(props)
+    super(props);
     this.cells = [];
-    this.aliveCells = [];
-    this.addToAliveCells = this.addToAliveCells.bind(this);
+    this.liveCells = [];
+    // this.addToAliveCells = this.addToAliveCells.bind(this);
     this.toggleLife = this.toggleLife.bind(this);
     this.startGame = this.startGame.bind(this);
     this.initialSetup();
 
     this.state = {
         lifeCycle: 0
-    }
+    };
   }
 
-  addToAliveCells(x,y,index){
-    this.aliveCells.push({x,y,index});
-    console.log(this.aliveCells);
-  }
+  // addToAliveCells(x,y,index){
+  //   this.liveCells.push({x,y,index});
+  //   console.log(this.liveCells);
+  // }
 
   toggleLife(cell){
-    if (this.aliveCells.includes(cell)){
-      this.aliveCells = this.aliveCells.filter((aliveCell) => aliveCell !== cell);
+    if (this.liveCells.includes(cell)){
+      this.liveCells = this.liveCells.filter((aliveCell) => aliveCell !== cell);
       cell.setState({alive:false});
       return;
     }
 
-    this.aliveCells.push(cell)
+    this.liveCells.push(cell);
     cell.setState({alive:true});
   }
 
@@ -39,9 +39,36 @@ export default class Board extends Component {
     }
   }
 
-  startGame(){
-    setInterval(() => this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
+  getNeighborCount(cell){
+    let neighbors = [];
+    // debugger;
+    this.liveCells.forEach((liveCell) => {
+      if ((liveCell.props.x >= cell.props.x - 1 && liveCell.props.x <= cell.props.x + 1 ) && (liveCell.props.y >= cell.props.y -1 && liveCell.props.y <= cell.props.y + 1) && (liveCell != cell)   ){
+        neighbors.push(liveCell);
+      }
+    });
+    return neighbors.length
   }
+
+  liveCellCheck(){
+    let choppingBlock = []
+    this.liveCells.forEach((liveCell) => {
+      let neighborCount = this.getNeighborCount(liveCell);
+      if (neighborCount < 2 || neighborCount > 3){
+        choppingBlock.push(liveCell);
+      }
+    });
+
+    choppingBlock.forEach((cell) => this.toggleLife(cell));
+
+  }
+
+  startGame(){
+    // setInterval(() => this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
+    this.liveCellCheck();
+  }
+
+
 
   render() {
 
