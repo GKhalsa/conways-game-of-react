@@ -6,16 +6,18 @@ export default class Board extends Component {
   constructor(props){
     super(props);
 
-    this.state = {
-      cells: []
-    };
+    // this.state = {
+    //   cells: [],
+    //   intervalId:0
+    // };
 
     this.liveCells = [];
     this.toggleLife = this.toggleLife.bind(this);
-    this.startGame = this.startGame.bind(this);
+    // this.startGame = this.startGame.bind(this);
 
     this.state = {
-        lifeCycle: 0
+        lifeCycle: 0,
+        cells:[]
     };
   }
 
@@ -109,7 +111,7 @@ export default class Board extends Component {
   getNeighborCount2(cell){
     let neighbors = [];
     this.liveCells.forEach((liveCell) => {
-      if ((liveCell.x >= cell.props.x - 1 && liveCell.x <= cell.props.x + 1 ) && (liveCell.y >= cell.props.y -1 && liveCell.y <= cell.props.y + 1) && (liveCell.x != cell.props.x && liveCell.y != cell.props.y) ){
+      if ((liveCell.x >= cell.props.x - 1 && liveCell.x <= cell.props.x + 1 ) && (liveCell.y >= cell.props.y -1 && liveCell.y <= cell.props.y + 1) && (liveCell.x != cell.props.x || liveCell.y != cell.props.y) && !cell.props.alive  ){
         neighbors.push(liveCell);
       }
     });
@@ -129,7 +131,7 @@ export default class Board extends Component {
 
     this.state.cells.forEach((cell) => {
       let neighborCount = this.getNeighborCount2(cell);
-      if (neighborCount == 4){
+      if (neighborCount == 3){
         newLife.push(cell);
       }
     });
@@ -145,8 +147,14 @@ export default class Board extends Component {
   }
 
   startGame(){
-    // setInterval(() => this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
+    // let intervalId = setInterval(this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
+    let intervalId = setInterval(this.timer.bind(this), 1000)
+    // this.liveCellCheck();
+  }
+
+  timer(){
     this.liveCellCheck();
+    this.setState({lifeCycle: this.state.lifeCycle + 1})
   }
 
   render() {
@@ -165,7 +173,7 @@ export default class Board extends Component {
         <div className="flex-container wrap">
           {this.state.cells}
         </div>
-        <button onClick={this.startGame}>Start</button>
+        <button onClick={this.startGame.bind(this)}>Start</button>
         <div>{this.state.lifeCycle}</div>
       </div>
     )
