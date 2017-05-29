@@ -5,19 +5,13 @@ export default class Board extends Component {
 
   constructor(props){
     super(props);
-
-    // this.state = {
-    //   cells: [],
-    //   intervalId:0
-    // };
-
     this.liveCells = [];
     this.toggleLife = this.toggleLife.bind(this);
-    // this.startGame = this.startGame.bind(this);
 
     this.state = {
         lifeCycle: 0,
-        cells:[]
+        cells:[],
+        intervalId: 0
     };
   }
 
@@ -45,50 +39,32 @@ export default class Board extends Component {
       this.liveCells.push({x:cellProps.x, y:cellProps.y, index:cellProps.index});
     }
 
-    let newCell = <Cell x={cellProps.x} y={cellProps.y} index={cellProps.index} alive={alive} toggleLife={this.toggleLife} key={cellProps.index}/>
-    const beforeCell = this.state.cells.slice(0,cellProps.index);
-    const afterCell = this.state.cells.slice(cellProps.index + 1);
-    const newCellArray = [...beforeCell,newCell,...afterCell];
+    let newCellArray = this.addCellToBoard(cellProps, this.state.cells, alive);
     this.setState({cells:newCellArray});
-
 
   }
 
   cellsReducer(cellArray, newLife){
     let cellsToSetToState = this.state.cells;
+
     cellArray.forEach((cell) => {
-      this.liveCells = this.liveCells.filter((liveCell) => liveCell.index !== cell.index)
-      let newCell = <Cell x={cell.x} y={cell.y} index={cell.index} alive={false} toggleLife={this.toggleLife} key={cell.index}/>
-      const beforeCell = cellsToSetToState.slice(0,cell.index);
-      const afterCell = cellsToSetToState.slice(cell.index + 1);
-      cellsToSetToState = [...beforeCell,newCell,...afterCell];
-    })
+      this.liveCells = this.liveCells.filter((liveCell) => liveCell.index !== cell.index);
+      cellsToSetToState = this.addCellToBoard(cell, cellsToSetToState, false);
+    });
 
     newLife.forEach((cell) => {
       this.liveCells.push({x:cell.props.x, y:cell.props.y, index:cell.props.index});
-      // this.liveCells.push(cell)
-      let newCell = <Cell x={cell.props.x} y={cell.props.y} index={cell.props.index} alive={true} toggleLife={this.toggleLife} key={cell.props.index}/>
-      const beforeCell = cellsToSetToState.slice(0,cell.props.index);
-      const afterCell = cellsToSetToState.slice(cell.props.index + 1);
-      cellsToSetToState = [...beforeCell,newCell,...afterCell];
-    })
+      cellsToSetToState = this.addCellToBoard(cell.props, cellsToSetToState, true);
+    });
     this.setState({cells: cellsToSetToState});
   }
 
-  // cellsReducer2(cellArray){
-  //   let cellsToSetToState = this.state.cells;
-  //   cellArray.forEach((cell) => {
-  //     // this.liveCells = this.liveCells.filter((liveCell) => liveCell.index !== cell.index)
-  //     this.liveCells.push({x:cell.props.x, y:cell.props.y, index:cell.props.index});
-  //     // this.liveCells.push(cell)
-  //     let newCell = <Cell x={cell.props.x} y={cell.props.y} index={cell.props.index} alive={true} toggleLife={this.toggleLife} key={cell.props.index}/>
-  //     const beforeCell = cellsToSetToState.slice(0,cell.props.index);
-  //     const afterCell = cellsToSetToState.slice(cell.props.index + 1);
-  //     cellsToSetToState = [...beforeCell,newCell,...afterCell];
-  //   })
-  //   this.setState({cells: cellsToSetToState});
-  // }
-
+  addCellToBoard(cell, cellsToSetToState, alive){
+    let newCell = <Cell x={cell.x} y={cell.y} index={cell.index} alive={alive} toggleLife={this.toggleLife} key={cell.index}/>
+    const beforeCell = cellsToSetToState.slice(0,cell.index);
+    const afterCell = cellsToSetToState.slice(cell.index + 1);
+    return [...beforeCell,newCell,...afterCell];
+  }
 
   componentWillMount(){
     let initialCells = []
@@ -137,19 +113,21 @@ export default class Board extends Component {
     });
 
     this.cellsReducer(choppingBlock, newLife);
-    // this.cellsReducer2(newLife);
-
-
-    // choppingBlock.forEach((cell) => {
-    //   this.toggleArrayOfLiveCells(cell)
-    // });
-    // newLife.forEach((cell) => cell.props.toggleLife);
   }
 
   startGame(){
-    // let intervalId = setInterval(this.setState({lifeCycle: this.state.lifeCycle + 1}), 1000)
+      if (this.state.intervalId > 0) {
+      return ;
+    }
+
     let intervalId = setInterval(this.timer.bind(this), 1000)
-    // this.liveCellCheck();
+    this.setState({intervalId: intervalId})
+
+  }
+
+  stopGame(){
+    clearInterval(this.state.intervalId);
+    this.setState({intervalId: 0})
   }
 
   timer(){
@@ -159,14 +137,6 @@ export default class Board extends Component {
 
   render() {
 
-    // for(let i = 0 ; i < 8576 ; i ++){
-      // this.cells.push(<Cell />)
-      // this.cells.push(React.createElement(Cell, { x:{i % 128} y:{Math.floor(i / 128)} key:{i} index:{i} toggleLife:{this.toggleLife} }, null) )
-    // }
-
-    // for(let i = 0 ; i < 8576 ; i ++){
-    //   this.cells.push(<Cell x={i % 128} y={Math.floor(i / 128)} key={i} index={i} alive={false} toggleLife={this.toggleLife}/>)
-    // }
 
     return (
       <div >
@@ -174,7 +144,13 @@ export default class Board extends Component {
           {this.state.cells}
         </div>
         <button onClick={this.startGame.bind(this)}>Start</button>
-        <div>{this.state.lifeCycle}</div>
+        <button onClick={this.stopGame.bind(this)}>Stop</button>
+        <div>Generation: {this.state.lifeCycle}</div>
+        <div>There are 4 rules:</div>
+        <div>1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.</div>
+        <div>2. Any live cell with two or three live neighbours lives on to the next generation.</div>
+        <div>3. Any live cell with more than three live neighbours dies, as if by overpopulation.</div>
+        <div>4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</div>
       </div>
     )
 
